@@ -1,7 +1,12 @@
+const { response } = require('express')
 const express= require('express')
 const path=require('path')
 
 const port= 8000
+
+const DB= require('./config/mongoose')  // Connecting to the database 
+
+const Contact= require('./models/contact') // Schema
 
 const app=express()
 
@@ -12,43 +17,16 @@ app.use(express.urlencoded({extended: true}))
 
 app.use(express.static('assets'))
 
-// middleware 1
-
-// app.use((req,res,next)=>{
-//   req.my_name="Swraj";
-//   console.log('Middleware 1 called')
-//   next()
-// });
-
-// // middleware 2
-// app.use((req,res,next)=>{
-//   console.log('Calling From Middleware 2',req.my_name);
-//   console.log('Middleware 2 Called')
-//   next();
-// })
-
-var contactList =[
-  {
-    name:"Swraj",
-    phone:"111111111"
-  },
-  {
-    name:"Tony Stark",
-    phone:"1234567890"
-  },
-  {
-    name:"Prakash",
-    phone:"0987654321"
-  },
-]
-
 app.get('/',(req,res)=>{
-  // console.log(__dirname);
-  // res.send('<h1>Welcome to the Express Server </h1>')
-  // console.log('Calling From get methode', req.my_name);
-  return res.render('home', {
-    title: "Contacts List",
-    contact_list:contactList
+
+  Contact.find({},(err,contacts)=>{
+    if(err){
+      console.log('Error While Fetching Contacts from db')
+    }
+    return res.render('home', {
+      title: "Contacts List",
+      contact_list:contacts
+    })
   })
 })
 
@@ -58,24 +36,31 @@ app.get('/practice',(req,res)=>{
   })
 })
 
-app.post('/create-contact',(req,res)=>{
-  // console.log(req.body);
-  // console.log(req.body.name)
-  // console.log(req.body.phone)
+app.post('/create-contact', async (req,res)=>{
+  console.log(req.body);
+  try{
+    const contact= await Contact.create(req.body);
+    
+    console.log('-------Contact Details--------');
+    console.log(contact);
 
-  // contactList.push({
-  //   name:req.body.name,
-  //   phone:req.body.phone,
-  // });
-
-  contactList.push(req.body)
-
-  return res.redirect('/');
+    return res.redirect('/');
+  }catch(e){
+    console.log(e.toString());
+  }
 })
 
-app.post('/delete-contact',(req,res)=>{
-  contactList.pop();
-  return res.redirect('/');
+app.get('/delete-contact',(req,res)=>{
+
+  let id=req.query.id;
+
+  Contact.findByIdAndDelete(id,(err)=>{
+    if(err){
+      console.log('Error in Deleting an Object From the DB');
+      return;
+    }
+    return res.redirect('/');
+  })
 })
 
 
