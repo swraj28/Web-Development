@@ -18,6 +18,6 @@
 
 ## Screenshots
 
-![](assets/images/Capture1.PNG)
+![](assets/images/Capture1.png)
 
 
