@@ -5,9 +5,16 @@ const port= 8000 // ports are basically unique id for every server
 const fs= require('fs')
 
 function requestHandler(req,res){
-  
-  console.log(req.url);
-  res.writeHead(200,{'content-type':'text/html'});
+
+  const log =`${Date.now()}: ${req.url}: New Req Received \n`;
+
+  fs.appendFile("log.txt",log,(err,res)=>{
+    if(err){
+      console.log(err);
+      return;
+    }
+    console.log(req.url);
+  });
 
   let filePath;
   
